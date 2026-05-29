@@ -9,17 +9,22 @@ export class FilesystemService {
   private CONCURRENCY_LIMIT = 50;
 
   async readDirectory(dirPath: string): Promise<FileEntry[]> {
+
+     if (!dirPath.startsWith('/host')) {
+        throw new Error('Invalid path. Must be inside mounted volume.');
+    }
+
     const resolvedPath = path.resolve(dirPath);
 
     let entries;
 
     try {
       entries = await fs.readdir(resolvedPath, { withFileTypes: true });
-    } catch {
-      throw new HttpException(
-        { message: 'Unable to read directory' },
-        HttpStatus.BAD_REQUEST,
-      );
+    } catch (error) {
+        console.error(error);
+        throw new Error(
+            `Unable to read directory: ${resolvedPath} - ${error.message}`
+        );
     }
 
     const results: FileEntry[] = [];
