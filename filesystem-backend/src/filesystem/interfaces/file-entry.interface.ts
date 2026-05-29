@@ -1,7 +1,3 @@
-/*
-
-*/
-
 export interface FileEntry {
   name: string;
   fullPath: string;
