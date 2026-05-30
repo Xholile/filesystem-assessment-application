@@ -1,45 +1,52 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+// filesystem.service.ts
+import { Injectable } from '@nestjs/common';
 import { promises as fs } from 'fs';
 import * as path from 'path';
 import { FileEntry } from './interfaces/file-entry.interface';
+
+export interface PaginatedResult {
+  data: FileEntry[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
 
 @Injectable()
 export class FilesystemService {
 
   private CONCURRENCY_LIMIT = 50;
 
-  async readDirectory(dirPath: string): Promise<FileEntry[]> {
+  async readDirectory(dirPath: string, page: number = 1, limit: number = 50): Promise<PaginatedResult> {
 
-     if (!dirPath.startsWith('/host')) {
-        throw new Error('Invalid path. Must be inside mounted volume.');
+    if (!dirPath.startsWith('/host')) {
+      throw new Error('Invalid path. Must be inside mounted volume.');
     }
 
     const resolvedPath = path.resolve(dirPath);
 
     let entries;
-
     try {
       entries = await fs.readdir(resolvedPath, { withFileTypes: true });
     } catch (error) {
-        console.error(error);
-        throw new Error(
-            `Unable to read directory: ${resolvedPath} - ${error.message}`
-        );
+      throw new Error(`Unable to read directory: ${resolvedPath} - ${error.message}`);
     }
+
+    const total = entries.length;
+    const totalPages = Math.ceil(total / limit);
+    const start = (page - 1) * limit;
+    const pageEntries = entries.slice(start, start + limit);
 
     const results: FileEntry[] = [];
 
-    // process in chunks (controlled concurrency)
-    for (let i = 0; i < entries.length; i += this.CONCURRENCY_LIMIT) {
-      const batch = entries.slice(i, i + this.CONCURRENCY_LIMIT);
+    for (let i = 0; i < pageEntries.length; i += this.CONCURRENCY_LIMIT) {
+      const batch = pageEntries.slice(i, i + this.CONCURRENCY_LIMIT);
 
       const batchResults = await Promise.all(
         batch.map(async (entry) => {
           const fullPath = path.join(resolvedPath, entry.name);
-
           try {
             const stats = await fs.stat(fullPath);
-
             return {
               name: entry.name,
               fullPath,
@@ -58,6 +65,6 @@ export class FilesystemService {
       results.push(...batchResults.filter(Boolean) as FileEntry[]);
     }
 
-    return results;
+    return { data: results, total, page, limit, totalPages };
   }
 }

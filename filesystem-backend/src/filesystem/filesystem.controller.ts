@@ -1,3 +1,4 @@
+// filesystem.controller.ts
 import { Controller, Get, Query, UsePipes, ValidationPipe } from '@nestjs/common';
 import { FilesystemService } from './filesystem.service';
 import { ListDirectoryDto } from './dto/list-directory.dto';
@@ -9,6 +10,6 @@ export class FilesystemController {
   @Get()
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   getDirectory(@Query() query: ListDirectoryDto) {
-    return this.filesystemService.readDirectory(query.path);
+    return this.filesystemService.readDirectory(query.path, query.page, query.limit);
   }
 }
