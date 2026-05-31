@@ -4,11 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { BehaviorSubject, combineLatest, switchMap, tap, catchError, of, map, shareReplay } from 'rxjs';
 import { FileEntry } from '../../../../core/models/file-entry.model';
 import { FilesystemService } from '../../../../core/services/filesystem';
+import { SearchComponent } from '../../../../shared/atoms/search/search.component';
+import { SortByComponent, SortOption } from '../../../../shared/atoms/sort-by/sort-by.component';
 
 @Component({
   selector: 'app-file-explorer',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, SearchComponent, SortByComponent],
   templateUrl: './file-explorer.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -35,7 +37,6 @@ export class FileExplorerComponent implements OnInit {
 
   readonly loading$ = new BehaviorSubject<boolean>(false);
 
-  // Fetch paginated results from backend when path or page changes
   private result$ = combineLatest([this.path$, this.page$]).pipe(
     tap(() => {
       this.error = null;
@@ -54,7 +55,6 @@ export class FileExplorerComponent implements OnInit {
     shareReplay(1)
   );
 
-  // Apply client-side search and sort on current page data only
   readonly files$ = combineLatest([
     this.result$.pipe(map(r => r?.data ?? [])),
     this.search$,
@@ -98,15 +98,21 @@ export class FileExplorerComponent implements OnInit {
 
   onSearch(value: string): void {
     this.search$.next(value);
+    this.page$.next(1);
   }
 
-  sortBy(field: keyof FileEntry): void {
+  /*sortBy(field: keyof FileEntry): void {
     if (this.sortField$.value === field) {
       this.sortAsc$.next(!this.sortAsc$.value);
     } else {
       this.sortField$.next(field);
       this.sortAsc$.next(true);
     }
+  }*/
+
+  onSortChange(option: SortOption): void {
+    this.sortField$.next(option.value);
+    this.sortAsc$.next(option.direction === 'asc');
   }
 
   goToPage(page: number): void {
