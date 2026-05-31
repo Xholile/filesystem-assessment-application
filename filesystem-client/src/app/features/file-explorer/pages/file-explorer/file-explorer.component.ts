@@ -101,15 +101,6 @@ export class FileExplorerComponent implements OnInit {
     this.page$.next(1);
   }
 
-  /*sortBy(field: keyof FileEntry): void {
-    if (this.sortField$.value === field) {
-      this.sortAsc$.next(!this.sortAsc$.value);
-    } else {
-      this.sortField$.next(field);
-      this.sortAsc$.next(true);
-    }
-  }*/
-
   onSortChange(option: SortOption): void {
     this.sortField$.next(option.value);
     this.sortAsc$.next(option.direction === 'asc');
