@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
 
 describe('AppController', () => {
   let controller: AppController;
@@ -8,7 +7,6 @@ describe('AppController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AppController],
-      providers: [AppService],
     }).compile();
 
     controller = module.get<AppController>(AppController);
@@ -18,7 +16,14 @@ describe('AppController', () => {
     expect(controller).toBeDefined();
   });
 
-  it('should return hello message', () => {
-    expect(controller.getHello()).toBeDefined();
+  it('should return API root message', () => {
+    expect(controller.getRoot()).toEqual({
+      message: 'Filesystem API is running',
+      endpoint: '/filesystem?path=/host',
+    });
   });
 });
+
+function expect(controller: AppController) {
+  throw new Error('Function not implemented.');
+}

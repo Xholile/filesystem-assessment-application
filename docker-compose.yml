@@ -1,7 +1,7 @@
 services:
   api:
     build:
-      context: .
+      context: ./filesystem-backend
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
@@ -13,7 +13,7 @@ services:
 
   client:
     build:
-      context: ../filesystem-client
+      context: ./filesystem-client
       dockerfile: Dockerfile
     ports:
       - "4200:80"

@@ -172,6 +172,14 @@ Although GraphQL was suggested in the assessment, REST was selected for this imp
 
 ## Running the Application
 
+### Step 1: Clone and select correct branch
+
+After cloning the repository, switch to the correct working branch:
+
+```bash
+git clone https://github.com/Xholile/filesystem-assessment-application.git
+git checkout dev
+
 ### Start with Docker
 
 ```bash
@@ -186,9 +194,16 @@ http://localhost:4200
 
 Backend:
 
+The backend exposes a REST API for filesystem navigation.
+
 ```text
+Base URL:
 http://localhost:3000
+
+Primary endpoint:
+http://localhost:3000/filesystem?path=/host&page=1&limit=50
 ```
+Note: All filesystem access is restricted to /host for security reasons.
 
 ---
 
